@@ -16,7 +16,7 @@ exports.createThing = (req, res, next) => {
         likes: 0,
         dislikes: 0,
         usersLiked: [],
-        usersDislikde: []
+        usersDisliked: []
   });
   sauce.save().then(
     () => {
@@ -32,6 +32,64 @@ exports.createThing = (req, res, next) => {
     }
   );
 };
+
+exports.likeThing = (req, res, next) => {
+  Sauce.findOne({
+    _id: req.params.id
+  }).then(
+    (sauce) => {
+      let currentSauce = res.json(sauce);
+      req.body = JSON.parse(req.body);
+
+      if(req.body.like === 1 && currentSauce.usersLiked.includes(req.body.userID)){
+        res.json({message : 'User already liked this sauce'})
+      }
+    
+      if(req.body.like === -1 && currentSauce.usersDisliked.includes(req.body.userId)){
+        res.json({message : 'User already disliked this sauce'})
+      }
+    
+      if(req.body.like === -1 && currentSauce.usersDisliked.includes(req.body.userId)=== false){
+        currentSauce.likes -= 1;
+        currentSauce.usersDisliked.push(req.body.userId);
+      }
+    
+      if(req.body.like === 1 && currentSauce.usersLiked.includes(req.body.userId) === false){
+        currentSauce.likes += 1;
+        currentSauce.usersLiked.push(req.body.userId);
+      }
+    
+      if(req.body.like === 0 && currentSauce.usersLiked.includes(req.body.userId)){
+        currentSauce.likes -= 1;
+        currentSauce.usersLiked.filter( id => id !== req.body.userId )
+      }
+    
+      if(req.body.like === 0 && currentSauce.usersDisliked.includes(req.body.userId)){
+        currentSauce.likes += 1;
+        currentSauce.usersDisLiked.filter( id => id !== req.body.userId )
+      }
+      currentSauce.save().then(
+        (sauce) => {
+          res.status(201).json({
+            message: 'Post saved successfully!'
+          });
+         })
+         .catch(
+          (error) => {
+            res.status(404).json({
+              error: error
+            });
+          }
+        );
+    }
+  ).catch(
+    (error) => {
+      res.status(404).json({
+        error: error
+      });
+    }
+  ); 
+}
 
 exports.getOneThing = (req, res, next) => {
     Sauce.findOne({
@@ -94,7 +152,6 @@ exports.getOneThing = (req, res, next) => {
     }
   );
 };
-
 
 exports.deleteThing = (req, res, next) => {
   Sauce.findOne({_id: req.params.id}).then(
