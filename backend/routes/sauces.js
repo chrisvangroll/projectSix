@@ -13,7 +13,7 @@ router.post('/', auth, multer, stuffCtrl.createThing);
 router.get('/' +
   '', auth, stuffCtrl.getAllthings);
 
-// router.post('/:id/like', auth, stuffCtrl.likeThing);
+router.post('/:id/like', auth, stuffCtrl.likeThing);
 
 router.get('/:id', auth,  stuffCtrl.getOneThing);
 

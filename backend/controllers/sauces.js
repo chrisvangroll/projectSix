@@ -33,63 +33,164 @@ exports.createThing = (req, res, next) => {
   );
 };
 
-exports.likeThing = (req, res, next) => {
-  Sauce.findOne({
-    _id: req.params.id
-  }).then(
-    (sauce) => {
-      let currentSauce = res.json(sauce);
-      req.body = JSON.parse(req.body);
+// exports.likeThing = async (req, res) => {
+//   try {
+//     const oneSauce = await Sauce.findOne({_id: req.params.id})
+//     if (req.body.like === 1 && !oneSauce.usersLiked.includes(req.body.userId)) {
+//       oneSauce.usersLiked.push(req.body.userId);
+//       oneSauce.likes += 1;
+//       if (oneSauce.usersDisliked.includes(req.body.userId)) {
+//         oneSauce.usersDisliked.remove(req.body.userId);
+//         oneSauce.dislikes += -1
+//       }
+//     }
+//     else if (req.body.like === 1 && oneSauce.usersLiked.includes(req.body.userId)) {
+//       res.status(201).json({ message: "You already liked" })
+//     }
 
-      if(req.body.like === 1 && currentSauce.usersLiked.includes(req.body.userID)){
-        res.json({message : 'User already liked this sauce'})
+//     else if (req.body.like === 0 && oneSauce.usersLiked.includes(req.body.userId)) {
+//       oneSauce.usersLiked.remove(req.body.userId);
+//       oneSauce.likes += -1;
+//     }
+//     else if (req.body.like === -1 && !oneSauce.usersDisliked.includes(req.body.userId)) {
+//       oneSauce.usersDisliked.push(req.body.userId);
+//       oneSauce.dislikes += 1;
+//       if (oneSauce.usersLiked.includes(req.body.userId)) {
+//         oneSauce.usersLiked.remove(req.body.userId);
+//         oneSauce.likes += -1
+//       }
+//     }
+//     else if (req.body.like === -1 && oneSauce.usersDisliked.includes(req.body.userId)) {
+//       res.status(201).json({ message: "You already Disliked" })
+//     }
+//     else if (req.body.like === 0 && oneSauce.usersDisliked.includes(req.body.userId)) {
+//       oneSauce.usersDisliked.remove(req.body.userId);
+//       oneSauce.dislikes += -1;
+//     }
+//     oneSauce.save()
+//     res.status(201).json({ message: "Preference sended to the system." })
+//   } catch (err) {
+//     res.status(404).json({ message: err });
+//   }
+// }
+
+exports.likeThing = async (req, res) => {
+  try {
+    const sauce = await Sauce.findOne({_id: req.params.id})
+
+    const userId = req.body.userId;
+    const userLike = (req.body.like ===1);
+    const userDislike = (req.body.like === -1);
+    const userCancel = (req.body.like === 0);
+    const hasLiked = (sauce.usersLiked.includes(userId));
+    const hasDisliked = (sauce.usersDisliked.includes(userId));
+
+    if (userLike && hasLiked === false) {
+      sauce.usersLiked.push(userId);
+      sauce.likes += 1;
+      if (sauce.usersDisliked.includes(userId)) {
+        sauce.usersDisLiked.filter( id => id !== userId )
+        sauce.dislikes -= 1
       }
-    
-      if(req.body.like === -1 && currentSauce.usersDisliked.includes(req.body.userId)){
-        res.json({message : 'User already disliked this sauce'})
-      }
-    1
-      if(req.body.like === -1 && currentSauce.usersDisliked.includes(req.body.userId)=== false){
-        currentSauce.likes -= 1;
-        currentSauce.usersDisliked.push(req.body.userId);
-      }
-    
-      if(req.body.like === 1 && currentSauce.usersLiked.includes(req.body.userId) === false){
-        currentSauce.likes += 1;
-        currentSauce.usersLiked.push(req.body.userId);
-      }
-    
-      if(req.body.like === 0 && currentSauce.usersLiked.includes(req.body.userId)){
-        currentSauce.likes -= 1;
-        currentSauce.usersLiked.filter( id => id !== req.body.userId )
-      }
-    
-      if(req.body.like === 0 && currentSauce.usersDisliked.includes(req.body.userId)){
-        currentSauce.likes += 1;
-        currentSauce.usersDisLiked.filter( id => id !== req.body.userId )
-      }
-      currentSauce.save().then(
-        (sauce) => {
-          res.status(201).json({
-            message: 'Post saved successfully!'
-          });
-         })
-         .catch(
-          (error) => {
-            res.status(404).json({
-              error: error
-            });
-          }
-        );
     }
-  ).catch(
-    (error) => {
-      res.status(404).json({
-        error: error
-      });
+    else if (userLike && hasLiked) {
+      res.status(201).json({ message: "You already liked" })
     }
-  ); 
+
+    else if (userCancel && hasLiked) {
+      sauce.usersLiked.filter( id => id !== userId )
+      sauce.likes -= 1;
+    }
+
+    else if (userDislike && hasDisliked === false) {
+      sauce.usersDisliked.push(userId);
+      sauce.dislikes += 1;
+      if (hasLiked) {
+        sauce.usersLiked.filter( id => id !== userId )
+        sauce.likes -= 1
+      }
+    }
+    else if (userDislike && hasDisliked) {
+      res.status(201).json({ message: "You already Disliked" })
+    }
+    else if (userCancel && hasDisliked) {
+      sauce.usersDisLiked.filter( id => id !== userId )
+      sauce.dislikes -= 1;
+    }
+    console.log(sauce)
+    console.log(req.body)
+
+    sauce.save()
+    res.status(201).json({ message: "Preference sended to the system." })
+  } catch (err) {
+    res.status(404).json({ message: err });
+  }
 }
+
+// exports.likeThing = (req, res, next) => {
+//   Sauce.findOne({_id: req.params.id})
+//   .then((sauce) => {
+//     const userId = req.body.userId;
+//     const userLike = (req.body.like ===1);
+//     const userDislike = (req.body.like === -1);
+//     const cancel = (req.body.like === 0);
+//     const canLike = (!sauce.usersLiked.includes(userId));
+//     const canDislike = (!sauce.usersDisliked.includes(userId));
+//     const alreadyVoted = (sauce.usersLiked.includes(userId) || sauce.usersDisliked.includes(userId));
+
+//       if(req.body.like === 1 && sauce.usersLiked.includes(req.body.userID)){
+//         res.json({message : 'User already liked this sauce'})
+//       }
+    
+//       else if(req.body.like === -1 && sauce.usersDisliked.includes(req.body.userId)){
+//         res.json({message : 'User already disliked this sauce'})
+//       }
+    
+//       else if(req.body.like === 1 && sauce.usersLiked.includes(req.body.userId) === false){
+//         sauce.dislikes +=1;
+//         sauce.usersDisliked.push(req.body.userId);
+//       }
+     
+//      else if(req.body.like === -1 && sauce.usersLiked.includes(req.body.userId) === false){
+//         sauce.dislikes -= 1;
+//         sauce.usersDisliked.push(req.body.userId);
+//       }
+
+      
+//       else if(req.body.like === 0 && sauce.usersLiked.includes(req.body.userId)){
+//         sauce.likes -= 1;
+//         sauce.usersLiked.filter( id => id !== req.body.userId )
+//       }
+    
+//       else if(req.body.like === 0 && sauce.usersDisliked.includes(req.body.userId)){
+//         sauce.dislikes -=1;
+//         sauce.usersDisLiked.filter( id => id !== req.body.userId )
+//       }
+
+//       console.log(sauce)
+//       console.log(req.body)
+//       sauce.save().then(
+//         (sauce) => {
+//           res.status(201).json({
+//             message: 'Post saved successfully!'
+//           });
+//          })
+//          .catch(
+//           (error) => {
+//             res.status(404).json({
+//               error: error
+//             });
+//           }
+//         );
+//     }
+//   ).catch(
+//     (error) => {
+//       res.status(404).json({
+//         error: error
+//       });
+//     }
+//   ); 
+//  }
 
 exports.getOneThing = (req, res, next) => {
     Sauce.findOne({
@@ -109,7 +210,6 @@ exports.getOneThing = (req, res, next) => {
 
 
   exports.updateThing = (req, res, next) => {
- 
   sauce = {...req.body}
   if (req.file) {
     const url = req.protocol + '://' + req.get('host');
