@@ -48,7 +48,7 @@ exports.likeThing = (req, res, next) => {
       if(req.body.like === -1 && currentSauce.usersDisliked.includes(req.body.userId)){
         res.json({message : 'User already disliked this sauce'})
       }
-    
+    1
       if(req.body.like === -1 && currentSauce.usersDisliked.includes(req.body.userId)=== false){
         currentSauce.likes -= 1;
         currentSauce.usersDisliked.push(req.body.userId);
@@ -109,34 +109,11 @@ exports.getOneThing = (req, res, next) => {
 
 
   exports.updateThing = (req, res, next) => {
-  let sauce = new Sauce({ _id: req.params._id });
+ 
+  sauce = {...req.body}
   if (req.file) {
     const url = req.protocol + '://' + req.get('host');
-    req.body.sauce = JSON.parse(req.body.sauce);
-    sauce = {
-      _id: req.params.id,
-      userID: req.body.sauce.userID,
-      name: req.body.sauce.name,
-      manufacturer: req.body.sauce.manufacturer,
-      description: req.body.sauce.description,
-      mainPepper: req.body.sauce.mainPepper,
-      imageUrl: url + '/images/' + req.file.filename,
-      heat: req.body.sauce.heat,
-      likes: 0,
-      dislikes: 0,
-      usersLiked: [],
-      usersDislikde: []
-    };
-  } else {
-    sauce = {
-      _id: req.params.id,
-      name: req.body.name,
-      manufacturer: req.body.manufacturer,
-      description: req.body.description,
-      mainPepper: req.body.mainPepper,
-      imageUrl: req.body.imageUrl,
-      heat: req.body.heat,
-    };
+   sauce.imageUrl = url + '/images/' + req.file.filename
   }
   Sauce.updateOne({_id: req.params.id}, sauce).then(
     () => {
