@@ -1,14 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-//const Sauces = require('./models/sauces');
 const app = express();
 const sauceRoutes = require('./routes/sauces')
 const userRoutes = require('./routes/user');
 const path = require('path');
 const cors = require('cors');
-//console.log('123')
-mongoose.connect('mongodb+srv://chris:xw5Lftse7cdfQ8P@cluster0.ddekq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
+require('dotenv/config');
+
+
+mongoose.connect(process.env.DB_CONNECTION,
+   { useNewUrlParser: true,  useUnifiedTopology: true, useCreateIndex:true }
+  )
+
   .then(() => {
     console.log('Successfully connected to MongoDB Atlas!');
   })
