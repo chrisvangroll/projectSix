@@ -6,6 +6,7 @@ const sauceRoutes = require('./routes/sauces')
 const userRoutes = require('./routes/user');
 const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet');
 require('dotenv/config');
 
 
@@ -24,7 +25,9 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${
   });
 
 //middleware
-app.use(cors())
+app.use(cors());
+
+app.use(helmet());
 
 app.use(bodyParser.json());
 
