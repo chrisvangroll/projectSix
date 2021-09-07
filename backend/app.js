@@ -9,7 +9,9 @@ const cors = require('cors');
 require('dotenv/config');
 
 
-mongoose.connect(process.env.DB_CONNECTION,
+// mongoose.connect(process.env.DB_CONNECTION,
+// mongodb+srv://chris:xw5Lftse7cdfQ8P@cluster0.ddekq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_COLL}`,
    { useNewUrlParser: true,  useUnifiedTopology: true, useCreateIndex:true }
   )
 
